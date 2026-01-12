@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;   
+use Illuminate\Http\Request; 
+use App\Models\Payment;
 use Razorpay\Api\Api;
 
 use function Pest\Laravel\json;
 
 class PaymentController extends Controller
 {
-    //
-
 
     public function createorder(Request $request)
     {
@@ -24,16 +23,19 @@ class PaymentController extends Controller
             'amount'=>'50000',
             'currency'=>'INR'
         ]);
+    $amount = 50000;
+        Payment::create([
+            'order_id'=>$order['id'],
+            'amount'=>$amount/100,
+            'status'=>'Pending'
+        ]);
 
         return response()->json([
             'order_id'=>$order['id'],
             'amount'=>$order['amount'],
             'key'=>env('RAZORPAY_KEY')
         ]);
-
-
     }
-
 
     public function verifypayments(Request $request){
 
@@ -47,6 +49,13 @@ class PaymentController extends Controller
             'razorpay_payment_id'=>$request->payment_id,
             'razorpay_signature'=>$request->signature
         ];
+
+        Payment::where('order_id', $request->order_id)->update([
+
+            'payment_id'=>$request->payment_id,
+            'signature'=>$request->signature,
+            'status'=>'Success'
+        ]);
 
         $api->utility->verifypaymentSignature($attributes);
         return response()->json([
