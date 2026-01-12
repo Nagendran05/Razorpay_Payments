@@ -26,7 +26,7 @@ class PaymentController extends Controller
     $amount = 50000;
         Payment::create([
             'order_id'=>$order['id'],
-            'amount'=>$amount,
+            'amount'=>$amount/100,
             'status'=>'Pending'
         ]);
 
@@ -35,7 +35,6 @@ class PaymentController extends Controller
             'amount'=>$order['amount'],
             'key'=>env('RAZORPAY_KEY')
         ]);
-
     }
 
     public function verifypayments(Request $request){
