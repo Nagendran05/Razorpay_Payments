@@ -10,16 +10,46 @@ class CartController extends Controller
 {
     public function add(Request $request)
 {
-    $product = Product::find($request->product_id);
+
+
+    $request->validate([
+        'product_id' => 'required|integer',
+        'qty' => 'required|integer|min:1'
+    ]);
+
+    
+    $product = Product::find($request->id);
+
+    if (!$product) {
+        return response()->json([
+            'message' => 'Product not found'
+        ], 404);
+    }
 
     Cart::create([
-        'product_id' => $product->id,
+        'product_id' => $product_id, 
         'qty' => $request->qty,
         'price' => $product->price,
         'total' => $product->price * $request->qty
     ]);
 
-    return response()->json(['message'=>'Added to cart']);
+    return response()->json([
+        'message' => 'Added to cart successfully'
+    ]);
 }
+
+    public function list(){
+
+        $cart = Cart::all();
+
+        $grandTotal = $cart->sum('total');
+
+
+        return response()->json([
+            'items'=>$cart,
+            'Total'=>$grandTotal
+        ]);
+
+    }
 
 }

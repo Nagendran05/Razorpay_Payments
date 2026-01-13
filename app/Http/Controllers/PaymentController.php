@@ -23,7 +23,7 @@ class PaymentController extends Controller
 
         $order =   $api->order->create([
             'receipt'=>'rcpt_'.time(),
-            'amount'=>$amount,
+            'amount'=>$amount*100,
             'currency'=>'INR'
         ]);
         Payment::create([
@@ -59,44 +59,10 @@ class PaymentController extends Controller
             'status'=>'Success'
         ]);
 
-        $api->utility->verifypaymentSignature($attributes);
+        // $api->utility->verifypaymentSignature($attributes);
         Cart::truncate();
         return response()->json([
             'status'=>'Payment Verified'
         ]);
-
-
-    }
-
-    public function webhooks(Request $request){
-        $payload = $request->getContent();
-        $razorpaySignature = $request->header('X-Razorpay-Signature');
-
-        $secret = env('RAZORPAY_WEBHOOK_SECRET');
-
-        $expectedSignature = hash_hmac(
-        'sha256',
-        $payload,
-        $secret
-    );
-
-    if ($razorpaySignature !== $expectedSignature) {
-        return response()->json(['error' => 'Invalid signature'], 400);
-    }
-
-    $data = json_decode($payload, true);
-
-    if ($data['event'] === 'payment.captured') {
-
-        $paymentId = $data['payload']['payment']['entity']['id'];
-        $orderId   = $data['payload']['payment']['entity']['order_id'];
-
-        Payment::where('order_id', $orderId)->update([
-            'payment_id' => $paymentId,
-            'status' => 'success'
-        ]);
-    }
-
-    return response()->json(['status' => 'Webhook processed']);
     }
 }
