@@ -18,7 +18,7 @@ class CartController extends Controller
     ]);
 
     
-    $product = Product::find($request->id);
+    $product = Product::find(1);
 
     if (!$product) {
         return response()->json([
@@ -27,8 +27,8 @@ class CartController extends Controller
     }
 
     Cart::create([
-        'product_id' => $product_id, 
-        'qty' => $request->qty,
+        'product_id' => 1, 
+        'qty' => 1,
         'price' => $product->price,
         'total' => $product->price * $request->qty
     ]);
